@@ -44,7 +44,6 @@ This file reads the foundation model from the Hugging Face model hub and the LoR
 Example usage:    
 
     python generate.py \
-        --load_8bit \
         --base_model 'openlm-research/open_llama_3b_600bt_preview' \
         --lora_weights './lora-alpaca'
     
