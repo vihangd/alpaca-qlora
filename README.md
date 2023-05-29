@@ -4,7 +4,7 @@ This repository can help to instruct-tune Open LLaMA on consumer hardware using 
 
 ## Training (finetune.py)
 
-This file contains a straightforward application of PEFT to the LLaMA model, as well as some code related to prompt construction and tokenization. PRs adapting this code to support larger models are always welcome.
+This file contains a straightforward application of QLoRA PEFT to the Open LLaMA model, as well as some code related to prompt construction and tokenization. PRs adapting this code to support larger models are always welcome.
 
 **Example usage:**
 
