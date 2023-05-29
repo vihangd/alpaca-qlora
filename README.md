@@ -68,4 +68,25 @@ For RedPajama
     --base_model 'togethercomputer/RedPajama-INCITE-Base-3B-v1'  \
     --lora_weights './dolly-lora-rp-3b-t1/'
        
+
+# Acknowledgements
+
+We would like to express our heartfelt gratitude to **Meta** for releasing LLaMA . Without this pioneering technology, the foundations of projects like **Open Llama** and **Alpaca** wouldn't exist. We sincerely appreciate the immense contributions you've made to the field.
+
+Our acknowledgements also extend to the teams behind **Open LLaMA**, **Together Computer**, **Alpaca** and **Alpaca LoRA**.. You can find more about their excellent work on their respective GitHub repositories:
+
+- [Open Llama](https://github.com/openlm-research/open_llama)
+- [Together Computer](https://github.com/togethercomputer)
+- [Alpaca](https://github.com/tatsu-lab/stanford_alpaca)
+- [Alpaca LoRa](https://github.com/tloen/alpaca-lora)
+
+Lastly, we would like to express our thanks to the developers of **QLoRA** and **bitsandbytes** Your efforts have been instrumental in advancing the field, and we're grateful for your contributions. More information about these projects can be found at:
+
+- [QLoRA](https://github.com/artidoro/qlora)
+- [bitsandbytes](https://github.com/TimDettmers/bitsandbytes)
+
+
+Thank you all for your commitment to innovation and for making these projects possible.
+
+
     
