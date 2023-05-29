@@ -38,7 +38,7 @@ We can also tweak our hyperparameters (similar to alpaca-lora):
         --train_on_inputs \
         --group_by_length
 
-##Inference (generate.py)
+## Inference (generate.py)
 This file reads the foundation model from the Hugging Face model hub and the LoRA weights from trained peft model, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
 
 Example usage:    
