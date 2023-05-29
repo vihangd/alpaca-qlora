@@ -1,12 +1,12 @@
 import os
 import sys
-from typing import List
+from typing import Dict, List
 
 import fire
 import torch
 import transformers
 from datasets import load_dataset
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, LlamaTokenizerFast
 from peft import prepare_model_for_kbit_training
 """
 Unused imports:
@@ -54,19 +54,6 @@ class SavePeftModelCallback(transformers.TrainerCallback):
         touch(os.path.join(args.output_dir, 'completed'))
         self.save_model(args, state, kwargs)
 
-#class SavePeftModelCallback(TrainerCallback):
-#    def on_save(self, args, state, control, **kwargs):
-#        checkpoint_folder = os.path.join(
-#            args.output_dir, f"{PREFIX_CHECKPOINT_DIR}-{state.global_step}"
-#        )       
-#
-#        peft_model_path = os.path.join(checkpoint_folder, "adapter_model")
-#        kwargs["model"].save_pretrained(peft_model_path)
-#
-#        pytorch_model_path = os.path.join(checkpoint_folder, "pytorch_model.bin")
-#        if os.path.exists(pytorch_model_path):
-#            os.remove(pytorch_model_path)
-#        return control
 
 bnb_config = BitsAndBytesConfig(
     load_in_4bit=True,
@@ -75,6 +62,7 @@ bnb_config = BitsAndBytesConfig(
     bnb_4bit_compute_dtype=torch.bfloat16
 )
 
+DEFAULT_PAD_TOKEN = "[PAD]"
 
 def print_trainable_parameters(model):
     """
@@ -89,6 +77,29 @@ def print_trainable_parameters(model):
     print(
         f"trainable params: {trainable_params} || all params: {all_param} || trainable%: {100 * trainable_params / all_param}"
     )
+
+def smart_tokenizer_and_embedding_resize(
+    special_tokens_dict: Dict,
+    tokenizer: transformers.PreTrainedTokenizer,
+    model: transformers.PreTrainedModel,
+):
+    """Resize tokenizer and embedding.
+
+    Note: This is the unoptimized version that may make your embedding size not be divisible by 64.
+    """
+    num_new_tokens = tokenizer.add_special_tokens(special_tokens_dict)
+    model.resize_token_embeddings(len(tokenizer))
+
+    if num_new_tokens > 0:
+        input_embeddings = model.get_input_embeddings().weight.data
+        output_embeddings = model.get_output_embeddings().weight.data
+
+        input_embeddings_avg = input_embeddings[:-num_new_tokens].mean(dim=0, keepdim=True)
+        output_embeddings_avg = output_embeddings[:-num_new_tokens].mean(dim=0, keepdim=True)
+
+        input_embeddings[-num_new_tokens:] = input_embeddings_avg
+        output_embeddings[-num_new_tokens:] = output_embeddings_avg
+
 
 def train(
     # model/data params
@@ -180,14 +191,26 @@ def train(
         device_map=device_map,
     )
 
-    tokenizer = AutoTokenizer.from_pretrained(base_model,unk_token="<unk>",
-                                                    bos_token="<s>",
-                                                    eos_token="</s>")
-
-    tokenizer.pad_token_id = (
-        0  # unk. we want this to be different from the eos token
-    )
+    tokenizer = AutoTokenizer.from_pretrained(base_model)
     
+    if tokenizer._pad_token is None:
+        smart_tokenizer_and_embedding_resize(
+            special_tokens_dict=dict(pad_token=DEFAULT_PAD_TOKEN),
+            tokenizer=tokenizer,
+            model=model,
+        )
+    if isinstance(tokenizer, LlamaTokenizerFast):
+        # LLaMA tokenizer may not have correct special tokens set.
+        # Check and add them if missing to prevent them from being parsed into different tokens.
+        # Note that these are present in the vocabulary. 
+        # Note also that `model.config.pad_token_id` is 0 which corresponds to `<unk>` token.
+        tokenizer.eos_token_id = model.config.eos_token_id
+        tokenizer.pad_token_id = model.config.pad_token_id
+        if hasattr(model.config, 'unk_token_id'):
+            tokenizer.unk_token_id = model.config.unk_token_id
+        else:
+            tokenizer.unk_token_id = tokenizer.pad_token_id
+            
 
     #tokenizer.padding_side = "left"  # Allow batched inference
 
@@ -306,7 +329,7 @@ def train(
             warmup_steps=100,
             num_train_epochs=num_epochs,
             learning_rate=learning_rate,
-            fp16=True,
+#            fp16=True,
             logging_steps=10,
             optim="paged_adamw_8bit",
             evaluation_strategy="steps" if val_set_size > 0 else "no",
