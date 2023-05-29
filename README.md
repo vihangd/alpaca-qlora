@@ -1,6 +1,6 @@
 # Fine-Tuning with QLoRA
 
-This repository can help to instruct-tune Open LLaMA on consumer hardware using QLoRA. It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on Open LLama Models, but should work with other models. Contributions are welcome!
+This repository can help to instruct-tune Open LLaMA on consumer hardware using QLoRA (Original implementation [here](https://github.com/artidoro/qlora)). It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on Open LLama Models, but should work with other models. Contributions are welcome!
 
 ## Training (finetune.py)
 
