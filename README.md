@@ -1,10 +1,10 @@
 # Fine-Tuning with QLoRA
 
-This repository can help to instruct-tune Open LLaMA on consumer hardware using QLoRA. It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on Open LLama Models, but should work with other models. Contributions are welcome!
+This repository can help to instruct-tune Open LLaMA on consumer hardware using QLoRA (Original implementation [here](https://github.com/artidoro/qlora)). It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on Open LLama Models, but should work with other models. Contributions are welcome!
 
 ## Training (finetune.py)
 
-This file contains a straightforward application of PEFT to the LLaMA model, as well as some code related to prompt construction and tokenization. PRs adapting this code to support larger models are always welcome.
+This file contains a straightforward application of QLoRA PEFT to the Open LLaMA model, as well as some code related to prompt construction and tokenization. PRs adapting this code to support larger models are always welcome.
 
 **Example usage:**
 
@@ -38,13 +38,12 @@ We can also tweak our hyperparameters (similar to alpaca-lora):
         --train_on_inputs \
         --group_by_length
 
-##Inference (generate.py)
+## Inference (generate.py)
 This file reads the foundation model from the Hugging Face model hub and the LoRA weights from trained peft model, and runs a Gradio interface for inference on a specified input. Users should treat this as example code for the use of the model, and modify it as needed.
 
 Example usage:    
 
     python generate.py \
-        --load_8bit \
         --base_model 'openlm-research/open_llama_3b_600bt_preview' \
         --lora_weights './lora-alpaca'
     
