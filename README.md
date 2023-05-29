@@ -1,13 +1,14 @@
 # Fine-Tuning with QLoRA
 
-This repository can help to instruct-tune Open LLaMA on consumer hardware using QLoRA (Original implementation [here](https://github.com/artidoro/qlora)). It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on Open LLama Models, but should work with other models. Contributions are welcome!
+This repository can help to instruct-tune Open LLaMA or RedPajama models on consumer hardware using QLoRA (Original implementation [here](https://github.com/artidoro/qlora)). It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on Open LLama 3b and RedPajama 3b Models, but should work with other models. Contributions are welcome!
 
 ## Training (finetune.py)
 
-This file contains a straightforward application of QLoRA PEFT to the Open LLaMA model, as well as some code related to prompt construction and tokenization. PRs adapting this code to support larger models are always welcome.
+This file contains a straightforward application of QLoRA PEFT to the Open LLaMA / RedPajama model, as well as some code related to prompt construction and tokenization. PRs adapting this code to support larger models are always welcome.
 
 **Example usage:**
 
+For Open LLaMa
 
     python finetune.py \
         --base_model 'openlm-research/open_llama_3b_600bt_preview' \
@@ -18,6 +19,18 @@ This file contains a straightforward application of QLoRA PEFT to the Open LLaMA
         --output_dir='./dolly-lora-3b' \
         --lora_r=16 \
         --lora_target_modules='[q_proj,v_proj]'
+
+For RedPajama
+
+    python finetune.py   \
+    --base_model='togethercomputer/RedPajama-INCITE-Base-3B-v1' \
+    --data_path='../datasets/alpaca-codeleet/dolly.json'   \
+    --num_epochs=3   \
+    --cutoff_len=512   \
+    --group_by_length   \
+    --output_dir='./dolly-lora-rp-3b-t1' \
+    --lora_r=16 \
+    --lora_target_modules='["query_key_value"]' 
 
 We can also tweak our hyperparameters (similar to alpaca-lora):
 
@@ -43,7 +56,16 @@ This file reads the foundation model from the Hugging Face model hub and the LoR
 
 Example usage:    
 
+For Open LLaMa
+
     python generate.py \
         --base_model 'openlm-research/open_llama_3b_600bt_preview' \
         --lora_weights './lora-alpaca'
+        
+For RedPajama
+
+    python generate.py  \
+    --base_model 'togethercomputer/RedPajama-INCITE-Base-3B-v1'  \
+    --lora_weights './dolly-lora-rp-3b-t1/'
+       
     
