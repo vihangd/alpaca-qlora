@@ -1,10 +1,10 @@
 # Fine-Tuning with QLoRA
 
-This repository can help to instruct-tune Open LLaMA or RedPajama models on consumer hardware using QLoRA (Original implementation [here](https://github.com/artidoro/qlora)). It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on Open LLama 3b and RedPajama 3b Models, but should work with other models. Contributions are welcome!
+This repository can help to instruct-tune Open LLaMA, RedPajama or StableLM models on consumer hardware using QLoRA (Original implementation [here](https://github.com/artidoro/qlora)). It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on Open LLama 3b and RedPajama 3b Models, but should work with other models. Contributions are welcome!
 
 ## Training (finetune.py)
 
-This file contains a straightforward application of QLoRA PEFT to the Open LLaMA / RedPajama model, as well as some code related to prompt construction and tokenization. PRs adapting this code to support larger models are always welcome.
+This file contains a straightforward application of QLoRA PEFT to the Open LLaMA / RedPajama / StableLM model, as well as some code related to prompt construction and tokenization. PRs adapting this code to support larger models are always welcome.
 
 **Example usage:**
 
@@ -31,6 +31,18 @@ For RedPajama
     --output_dir='./dolly-lora-rp-3b-t1' \
     --lora_r=16 \
     --lora_target_modules='["query_key_value"]' 
+    
+For StableLM
+
+    python finetune.py  \
+    --base_model='stabilityai/stablelm-base-alpha-3b' \
+    --data_path='../datasets/alpaca-codeleet/dolly.json' \
+    --num_epochs=3 \
+    --cutoff_len=512 \
+    --group_by_length  \
+    --output_dir='./dolly-lora-st-3b-t1' \
+    --lora_r=16 \
+    --lora_target_modules='["query_key_value"]'
 
 We can also tweak our hyperparameters (similar to alpaca-lora):
 
@@ -68,7 +80,12 @@ For RedPajama
     --base_model 'togethercomputer/RedPajama-INCITE-Base-3B-v1'  \
     --lora_weights './dolly-lora-rp-3b-t1/'
        
+For StableLM
 
+    python generate.py  \
+    --base_model 'stabilityai/stablelm-base-alpha-3b' \
+    --lora_weights './dolly-lora-st-3b-t1'
+    
 # Acknowledgements
 
 We would like to express our heartfelt gratitude to **Meta** for releasing LLaMA . Without this pioneering technology, the foundations of projects like **Open Llama** and **Alpaca** wouldn't exist. We sincerely appreciate the immense contributions you've made to the field.
