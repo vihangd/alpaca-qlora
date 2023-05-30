@@ -24,7 +24,7 @@ For RedPajama
 
     python finetune.py   \
     --base_model='togethercomputer/RedPajama-INCITE-Base-3B-v1' \
-    --data_path='../datasets/alpaca-codeleet/dolly.json'   \
+    --data_path='../datasets/dolly.json'   \
     --num_epochs=3   \
     --cutoff_len=512   \
     --group_by_length   \
@@ -36,7 +36,7 @@ For StableLM
 
     python finetune.py  \
     --base_model='stabilityai/stablelm-base-alpha-3b' \
-    --data_path='../datasets/alpaca-codeleet/dolly.json' \
+    --data_path='../datasets/dolly.json' \
     --num_epochs=3 \
     --cutoff_len=512 \
     --group_by_length  \
