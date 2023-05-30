@@ -53,6 +53,18 @@ For StableLM
     --output_dir='./dolly-lora-st-3b-t1' \
     --lora_r=16 \
     --lora_target_modules='["query_key_value"]'
+    
+For Pythia
+
+    python finetune.py  \
+    --base_model='EleutherAI/pythia-6.9b-deduped' \
+    --data_path='../datasets/dolly.json' \
+    --num_epochs=1 \
+    --cutoff_len=512 \
+    --group_by_length  \
+    --output_dir='./dolly-lora-pyt-6b-t1' \
+    --lora_r=8 \
+    --lora_target_modules='["query_key_value"]'
 
 We can also tweak our hyperparameters (similar to alpaca-lora):
 
@@ -95,6 +107,12 @@ For StableLM
     python generate.py  \
     --base_model 'stabilityai/stablelm-base-alpha-3b' \
     --lora_weights './dolly-lora-st-3b-t1'
+    
+For Pythia
+   
+    python generate.py  \
+    --base_model 'EleutherAI/pythia-6.9b-deduped'  \
+    --lora_weights './dolly-lora-pyt-6b-t1'
     
 # Acknowledgements
 
