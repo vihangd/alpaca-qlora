@@ -2,6 +2,16 @@
 
 This repository can help to instruct-tune Open LLaMA, RedPajama or StableLM models on consumer hardware using QLoRA (Original implementation [here](https://github.com/artidoro/qlora)). It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on Open LLama 3b and RedPajama 3b Models, but should work with other models. Contributions are welcome!
 
+### Local Setup
+
+1. Install dependencies
+
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+1. If bitsandbytes doesn't work, [install it from source.](https://github.com/TimDettmers/bitsandbytes/blob/main/compile_from_source.md) Windows users can follow [these instructions](https://github.com/tloen/alpaca-lora/issues/17).
+
 ## Training (finetune.py)
 
 This file contains a straightforward application of QLoRA PEFT to the Open LLaMA / RedPajama / StableLM model, as well as some code related to prompt construction and tokenization. PRs adapting this code to support larger models are always welcome.
