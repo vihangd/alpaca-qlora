@@ -1,6 +1,6 @@
 # LLM Fine-Tuning with QLoRA
 
-This repository can help to instruct-tune Open LLaMA, RedPajama or StableLM models on consumer hardware using QLoRA (Original implementation [here](https://github.com/artidoro/qlora)). It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on Open LLama 3b and RedPajama 3b Models, but should work with other models. Contributions are welcome!
+This repository can help to instruct-tune Open LLaMA, RedPajama, Falcon or StableLM models on consumer hardware using QLoRA (Original implementation [here](https://github.com/artidoro/qlora)). It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on Open LLama 3b and RedPajama 3b Models, but should work with other models. Contributions are welcome!
 
 ### Local Setup
 
@@ -14,7 +14,7 @@ This repository can help to instruct-tune Open LLaMA, RedPajama or StableLM mode
 
 ## Training (finetune.py)
 
-This file contains a straightforward application of QLoRA PEFT to the Open LLaMA / RedPajama / StableLM model, as well as some code related to prompt construction and tokenization. PRs adapting this code to support larger models are always welcome.
+This file contains a straightforward application of QLoRA PEFT to the Open LLaMA / RedPajama / Falcon / StableLM model, as well as some code related to prompt construction and tokenization. PRs adapting this code to support larger models are always welcome.
 
 **Example usage:**
 
@@ -66,6 +66,18 @@ For Pythia
     --lora_r=8 \
     --lora_target_modules='["query_key_value"]'
 
+For Falcon
+
+    python finetune.py  \
+    --base_model='tiiuae/falcon-7b'     \
+    --data_path='../datasets/alpaca-codeleet/dolly.json'     \
+    --num_epochs=1     \
+    --cutoff_len=512     \
+    --group_by_length     \
+    --output_dir='./dolly-lora-falcon-7b-t1'   \
+    --lora_r=8 \
+    --lora_target_modules='["query_key_value"]'
+
 We can also tweak our hyperparameters (similar to alpaca-lora):
 
     python finetune.py \
@@ -113,6 +125,12 @@ For Pythia
     python generate.py  \
     --base_model 'EleutherAI/pythia-6.9b-deduped'  \
     --lora_weights './dolly-lora-pyt-6b-t1'
+
+For Falcon
+
+    python generate.py     \
+    --base_model 'tiiuae/falcon-7b'   \
+    --lora_weights './dolly-lora-falcon-7b-t1'
     
 # Acknowledgements
 
