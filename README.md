@@ -70,7 +70,7 @@ For Falcon
 
     python finetune.py  \
     --base_model='tiiuae/falcon-7b'     \
-    --data_path='../datasets/alpaca-codeleet/dolly.json'     \
+    --data_path='../datasets/dolly.json'     \
     --num_epochs=1     \
     --cutoff_len=512     \
     --group_by_length     \
