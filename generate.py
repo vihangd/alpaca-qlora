@@ -47,6 +47,7 @@ def main(
             load_in_4bit=True,   
             torch_dtype=torch.float16,
             device_map="auto",
+            trust_remote_code=True
         )
         model = PeftModel.from_pretrained(
             model,

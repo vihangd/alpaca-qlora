@@ -189,6 +189,7 @@ def train(
         base_model,
         quantization_config=bnb_config,
         device_map=device_map,
+        trust_remote_code=True
     )
 
     tokenizer = AutoTokenizer.from_pretrained(base_model)
@@ -329,7 +330,7 @@ def train(
             warmup_steps=100,
             num_train_epochs=num_epochs,
             learning_rate=learning_rate,
-#            fp16=True,
+            bf16=True,
             logging_steps=10,
             optim="paged_adamw_8bit",
             evaluation_strategy="steps" if val_set_size > 0 else "no",
