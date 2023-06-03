@@ -2,6 +2,13 @@
 
 This repository can help to instruct-tune Open LLaMA, RedPajama, Falcon or StableLM models on consumer hardware using QLoRA (Original implementation [here](https://github.com/artidoro/qlora)). It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on Open LLama 3b and RedPajama 3b Models, but should work with other models. Contributions are welcome!
 
+## Supported Models
+    1. RedPajama
+    2. StableLM
+    3. Open LLaMA/LLaMA
+    4. Falcon
+    5. Codegen
+
 ### Local Setup
 
 1. Install dependencies
@@ -78,6 +85,18 @@ For Falcon
     --lora_r=8 \
     --lora_target_modules='["query_key_value"]'
 
+For codegen 
+
+    python finetune.py      \
+    --base_model='Salesforce/codegen-350M-mono'     \
+    --data_path='../datasets/code_alpaca_20k.json' \
+    --num_epochs=1     \
+    --cutoff_len=512     \
+    --group_by_length     \
+    --output_dir='./ca-cg-350m-t1'   \
+    --lora_r=8 \
+    --lora_target_modules='["qkv_proj"]'
+
 We can also tweak our hyperparameters (similar to alpaca-lora):
 
     python finetune.py \
@@ -131,6 +150,13 @@ For Falcon
     python generate.py     \
     --base_model 'tiiuae/falcon-7b'   \
     --lora_weights './dolly-lora-falcon-7b-t1'
+
+For Codegen
+
+    python generate.py \
+    --base_model 'Salesforce/codegen-350M-mono'   \
+    --lora_weights './ca-cg-350m-t1'
+
     
 # Acknowledgements
 
