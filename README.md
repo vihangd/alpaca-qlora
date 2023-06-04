@@ -8,6 +8,7 @@ This repository can help to instruct-tune Open LLaMA, RedPajama, Falcon or Stabl
     3. Open LLaMA/LLaMA
     4. Falcon
     5. Codegen
+    6. gpt_bigcode models 
 
 ### Local Setup
 
@@ -97,6 +98,18 @@ For codegen
     --lora_r=8 \
     --lora_target_modules='["qkv_proj"]'
 
+For gpt_bigcode
+
+     python finetune.py      \
+     --base_model='bigcode/gpt_bigcode-santacoder'     \
+     --data_path='../datasets/code_alpaca_20k.json'    \
+     --num_epochs=1     \
+     --cutoff_len=512     \
+     --group_by_length     \
+     --output_dir='./ca-big_code-santa-t1'   \
+     --lora_r=8 \
+     --lora_target_modules='["c_proj"]'
+
 We can also tweak our hyperparameters (similar to alpaca-lora):
 
     python finetune.py \
@@ -156,6 +169,12 @@ For Codegen
     python generate.py \
     --base_model 'Salesforce/codegen-350M-mono'   \
     --lora_weights './ca-cg-350m-t1'
+
+For gpt_bigcode
+
+    python generate.py     \
+    --base_model 'bigcode/gpt_bigcode-santacoder'   \
+    --lora_weights './ca-big_code-santa-t1'
 
     
 # Acknowledgements
