@@ -185,6 +185,9 @@ def train(
     if len(wandb_log_model) > 0:
         os.environ["WANDB_LOG_MODEL"] = wandb_log_model
 
+    if "rwkv" in base_model.lower():
+        bnb_config.bnb_4bit_use_double_quant = False
+
     model = AutoModelForCausalLM.from_pretrained(
         base_model,
         quantization_config=bnb_config,
@@ -263,7 +266,11 @@ def train(
             ]  # could be sped up, probably
         return tokenized_full_prompt
 
-    model = prepare_model_for_kbit_training(model)
+    if isinstance(model, RwkvForCausalLM):
+        use_gradient_checkpointing=False
+    else:
+        use_gradient_checkpointing=True
+    model = prepare_model_for_kbit_training(model, use_gradient_checkpointing=use_gradient_checkpointing)
 
     config = LoraConfig(
         r=lora_r,
