@@ -6,7 +6,7 @@ import fire
 import torch
 import transformers
 from datasets import load_dataset
-from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, LlamaTokenizerFast
+from transformers import AutoTokenizer, AutoModelForCausalLM, BitsAndBytesConfig, LlamaTokenizerFast, RwkvForCausalLM
 from peft import prepare_model_for_kbit_training
 """
 Unused imports:
@@ -106,6 +106,7 @@ def train(
     base_model: str = "",  # the only required argument
     data_path: str = "yahma/alpaca-cleaned",
     output_dir: str = "./lora-alpaca",
+    device_map: str = "auto",
     # training hyperparams
     batch_size: int = 128,
     micro_batch_size: int = 4,
@@ -132,6 +133,8 @@ def train(
     wandb_log_model: str = "",  # options: false | true
     resume_from_checkpoint: str = None,  # either training checkpoint or final adapter
     prompt_template_name: str = "alpaca",  # The prompt template to use, will default to alpaca.
+    # experimental
+    use_landmark: bool = False,
 ):
     if int(os.environ.get("LOCAL_RANK", 0)) == 0:
         print(
@@ -166,7 +169,7 @@ def train(
 
     prompter = Prompter(prompt_template_name)
 
-    device_map = "auto"
+    #device_map = "auto"
     world_size = int(os.environ.get("WORLD_SIZE", 1))
     ddp = world_size != 1
     if ddp:
@@ -188,12 +191,21 @@ def train(
     if "rwkv" in base_model.lower():
         bnb_config.bnb_4bit_use_double_quant = False
 
-    model = AutoModelForCausalLM.from_pretrained(
-        base_model,
-        quantization_config=bnb_config,
-        device_map=device_map,
-        trust_remote_code=True
-    )
+    if use_landmark:
+        from experiments.landmark import LlamaForCausalLM
+        model = LlamaForCausalLM.from_pretrained(
+            base_model,
+            quantization_config=bnb_config,
+            device_map=device_map,
+            trust_remote_code=True
+        )
+    else:
+        model = AutoModelForCausalLM.from_pretrained(
+            base_model,
+            quantization_config=bnb_config,
+            device_map=device_map,
+            trust_remote_code=True
+        )
 
     tokenizer = AutoTokenizer.from_pretrained(base_model)
     
