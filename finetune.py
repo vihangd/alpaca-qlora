@@ -117,6 +117,7 @@ def train(
     prompt_template_name: str = "alpaca",  # The prompt template to use, will default to alpaca.
     # experimental
     use_landmark: bool = False,
+    use_rope_scaled: bool = False,
 ):
     if int(os.environ.get("LOCAL_RANK", 0)) == 0:
         print(
@@ -207,6 +208,20 @@ def train(
 
         mem_id = tokenizer.convert_tokens_to_ids(mem_token)
         model.set_mem_id(mem_id)
+    elif use_rope_scaled:
+        from experiments.llama_rope_scaled_monkey_patch import replace_llama_rope_with_scaled_rope
+        replace_llama_rope_with_scaled_rope()
+
+        from transformers import  LlamaForCausalLM
+
+        model = LlamaForCausalLM.from_pretrained(
+            base_model,
+            quantization_config=bnb_config,
+            device_map=device_map,
+        )
+
+        tokenizer = AutoTokenizer.from_pretrained(base_model)
+
     else:
         model = AutoModelForCausalLM.from_pretrained(
             base_model,
