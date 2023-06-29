@@ -12,6 +12,12 @@ from transformers import GenerationConfig, LlamaForCausalLM, LlamaTokenizer
 
 from utils.callbacks import Iteratorize, Stream
 from utils.prompter import Prompter
+from utils.smart_tokenizer import smart_tokenizer_and_embedding_resize
+
+DEFAULT_PAD_TOKEN = "[PAD]"
+DEFAULT_EOS_TOKEN = "</s>"
+DEFAULT_BOS_TOKEN = "<s>"
+DEFAULT_UNK_TOKEN = "<unk>"
 
 if torch.cuda.is_available():
     device = "cuda"
@@ -28,10 +34,13 @@ except:  # noqa: E722
 def main(
     load_8bit: bool = False,
     base_model: str = "",
-    lora_weights: str = "hfrepo/lora-model",
+    lora_weights: str = None,
     prompt_template: str = "",  # The prompt template to use, will default to alpaca.
     server_name: str = "0.0.0.0",  # Allows to listen on all interfaces by providing '0.
     share_gradio: bool = False,
+    use_landmark: bool = False,
+    use_scaled_rope: bool = False,
+    use_ntk_aware_scaled_rope: bool = False,
 ):
     base_model = base_model or os.environ.get("BASE_MODEL", "")
     assert (
@@ -41,20 +50,77 @@ def main(
     prompter = Prompter(prompt_template)
     tokenizer = AutoTokenizer.from_pretrained(base_model)
     if device == "cuda":
-        model = AutoModelForCausalLM.from_pretrained(
-            base_model,
-            #load_in_8bit=load_8bit,
-            load_in_4bit=True,   
-            torch_dtype=torch.float16,
-            device_map="auto",
-            trust_remote_code=True
-        )
-        model = PeftModel.from_pretrained(
-            model,
-            lora_weights,
-            torch_dtype=torch.float16,
-#                    device_map={'': 0}
-        )
+        if use_scaled_rope:
+            from experiments.llama_rope_scaled_monkey_patch import replace_llama_rope_with_scaled_rope
+            replace_llama_rope_with_scaled_rope()
+            from transformers.models.llama.modeling_llama import LlamaForCausalLM
+            model = LlamaForCausalLM.from_pretrained(
+                base_model,
+                load_in_4bit=True,   
+                torch_dtype=torch.bfloat16,
+                device_map="auto",
+            )
+        elif use_ntk_aware_scaled_rope:
+           from experiments.llama_ntk_aware_rope_monkey_patch import replace_llama_rope_with_ntk_aware_scaled_rope 
+           replace_llama_rope_with_ntk_aware_scaled_rope()
+           from transformers.models.llama.modeling_llama import LlamaForCausalLM
+           model = LlamaForCausalLM.from_pretrained(
+                base_model,
+                load_in_4bit=True,   
+                torch_dtype=torch.bfloat16,
+                device_map="auto",
+            )
+           
+        elif use_landmark:
+            from experiments.landmark import LlamaForCausalLM
+            model = LlamaForCausalLM.from_pretrained(
+                base_model,
+                load_in_4bit=True,   
+                torch_dtype=torch.bfloat16,
+                device_map="auto",
+                trust_remote_code=True
+            )
+            tokenizer = AutoTokenizer.from_pretrained(base_model,
+                                                  model_max_length=3000,
+                                                  padding_side="right",
+                                                  use_fast=False)
+
+            mem_token = "<landmark>"
+            special_tokens_dict = dict()
+            if tokenizer.pad_token is None:
+                special_tokens_dict["pad_token"] = DEFAULT_PAD_TOKEN
+            if tokenizer.eos_token is None:
+                special_tokens_dict["eos_token"] = DEFAULT_EOS_TOKEN
+            if tokenizer.bos_token is None:
+                special_tokens_dict["bos_token"] = DEFAULT_BOS_TOKEN
+            if tokenizer.unk_token is None:
+                special_tokens_dict["unk_token"] = DEFAULT_UNK_TOKEN
+            special_tokens_dict["additional_special_tokens"] = [mem_token]
+
+            smart_tokenizer_and_embedding_resize(
+                special_tokens_dict=special_tokens_dict,
+                tokenizer=tokenizer,
+                model=model,
+            )
+
+            mem_id = tokenizer.convert_tokens_to_ids(mem_token)
+            model.set_mem_id(mem_id) 
+        else:
+            model = AutoModelForCausalLM.from_pretrained(
+                base_model,
+                #load_in_8bit=load_8bit,
+                load_in_4bit=True,   
+                torch_dtype=torch.float16,
+                device_map="auto",
+                trust_remote_code=True
+            )
+        if lora_weights is not None:
+            model = PeftModel.from_pretrained(
+                model,
+                lora_weights,
+                torch_dtype=torch.float16,
+    #                    device_map={'': 0}
+            )
     elif device == "mps":
         model = LlamaForCausalLM.from_pretrained(
             base_model,
@@ -185,7 +251,7 @@ def main(
                 minimum=1, maximum=4, step=1, value=4, label="Beams"
             ),
             gr.components.Slider(
-                minimum=1, maximum=2000, step=1, value=128, label="Max tokens"
+                minimum=1, maximum=16384, step=1, value=128, label="Max tokens"
             ),
             gr.components.Checkbox(label="Stream output"),
         ],
