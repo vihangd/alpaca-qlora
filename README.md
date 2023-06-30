@@ -176,7 +176,9 @@ For gpt_bigcode
     --base_model 'bigcode/gpt_bigcode-santacoder'   \
     --lora_weights './ca-big_code-santa-t1'
 
-    
+# Media Coverage    
+AemonAlgiz's [walkthrough video here](https://www.youtube.com/watch?v=8vmWGX1nfNM&t=694s)    
+
 # Acknowledgements
 
 We would like to express our heartfelt gratitude to **Meta** for releasing LLaMA . Without this pioneering technology, the foundations of projects like **Open Llama** and **Alpaca** wouldn't exist. We sincerely appreciate the immense contributions you've made to the field.
