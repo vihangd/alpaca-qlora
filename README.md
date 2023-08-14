@@ -1,11 +1,11 @@
 # LLM Fine-Tuning with QLoRA
 
-This repository can help to instruct-tune Open LLaMA, RedPajama, Falcon or StableLM models on consumer hardware using QLoRA (Original implementation [here](https://github.com/artidoro/qlora)). It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on following models, but should work with other models. Contributions are welcome!
+This repository can help to instruct-tune LLaMA (1 & 2), Open LLaMA, RedPajama, Falcon or StableLM models on consumer hardware using QLoRA (Original implementation [here](https://github.com/artidoro/qlora)). It's mostly based on the original alpaca-lora repo which can be found [here](https://github.com/tloen/alpaca-lora). Please note that this has only been tested on following models, but should work with other models. Contributions are welcome!
 
 ## Supported Models
     1. RedPajama
     2. StableLM
-    3. Open LLaMA/LLaMA
+    3. Open LLaMA/LLaMA (1 & 2)
     4. Falcon
     5. Codegen
     6. gpt_bigcode models 
